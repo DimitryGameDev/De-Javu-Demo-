@@ -33,15 +33,15 @@ public class OnePersonCamera : SingletonBase<OnePersonCamera>
 
     public void Move(float dirX, float dirY)
     {
-        if (enabled || _isLocked) return;
+        if (enabled)return;
+        transform.position = _target.position;
         
+        if (_isLocked) return;
         _rotation.x += dirX * sensitivity;
         _rotation.y += dirY * sensitivity;
         _rotation.y = Mathf.Clamp(_rotation.y, -yRotationLimit, yRotationLimit);
         var xQuat = Quaternion.AngleAxis(_rotation.x, Vector3.up);
         var yQuat = Quaternion.AngleAxis(_rotation.y, Vector3.left);
-
-        transform.position = _target.position;
         transform.localRotation = xQuat * yQuat;
     }
 
@@ -81,6 +81,7 @@ public class OnePersonCamera : SingletonBase<OnePersonCamera>
             }
         }
     }
+    
     private void Set(Transform targetForCamera, TypeMoveCamera typeMoveCamera)
     {
         typeMove = typeMoveCamera;
@@ -106,12 +107,30 @@ public class OnePersonCamera : SingletonBase<OnePersonCamera>
         {
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
+            CharacterInputController.Instance.enabled = true;
         }
         else
         {
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
+            CharacterInputController.Instance.enabled = false;
         }
         Set(targetForCamera, typeMoveCamera);
     }
+
+    public void CameraLock(bool value)
+    {
+        _isLocked = value;
+        if (_isLocked)
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+    }
+
 }

@@ -136,8 +136,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   npcName: April
-  portrait: {fileID: 21300000, guid: fc2460926bd89d148920ef4d8b350ccb, type: 3}
-  dialogueObj: {fileID: 11400000, guid: 20c3c6bf52be00f458d24c087c443c27, type: 2}
+  dialogueObj: {fileID: 11400000, guid: 12081f4d94b4aae4fbdb740caa8cc302, type: 2}
+  dialogueType: 1
   pos: {fileID: 5675414962048753358}
 --- !u!82 &9207672896299746234
 AudioSource:
@@ -260,13 +260,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8136135285361661386}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0.00022664663}
+  m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
   m_LocalPosition: {x: -0.183, y: 1.289, z: 1.0090005}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8499176153963217185}
-  m_LocalEulerAnglesHint: {x: 0, y: -179.974, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
 --- !u!1001 &3688252642963159729
 PrefabInstance:
   m_ObjectHideFlags: 0

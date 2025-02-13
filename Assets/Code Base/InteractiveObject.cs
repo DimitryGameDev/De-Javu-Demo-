@@ -14,12 +14,12 @@ public class InteractiveObject: MonoBehaviour
         _interactiveBoxUI.Disable();
     }
 
-    public void Hit()
+    public virtual void Hit()
     {
         StartCoroutine(ShowText());
     }
     
-    private IEnumerator ShowText()
+    protected IEnumerator ShowText()
     {
         _interactiveBoxUI.Enable();
         yield return new WaitForSeconds(_timeBoxHide);

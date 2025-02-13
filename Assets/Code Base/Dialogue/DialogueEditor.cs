@@ -3,6 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 
 public  class DialogueEditor : EditorWindow
@@ -228,7 +229,7 @@ public  class DialogueEditor : EditorWindow
 [Serializable]
 public class DialogueNode
 {
-	[TextArea] public string[] npcText;
+	public NpcText[] npcText;
 	public PlayerAnswer[] playerAnswer;
 }
 	
@@ -239,4 +240,28 @@ public class PlayerAnswer
 	public int toNode;
 	public int value;
 	public bool exit;
+}
+
+[Serializable]
+public class NpcText
+{
+	[TextArea] public string text;
+	public NpcEmotion emotion = NpcEmotion.Neutral;
+	public Npc name = Npc.Hero;
+}
+
+public enum Npc
+{
+	Hero = 0,
+	April = 1,
+	Patient = 2
+}
+
+public enum NpcEmotion
+{
+	Neutral = 0,
+	Happy = 1,
+	Angry = 2,
+	Sad = 3,
+	Fear = 4
 }

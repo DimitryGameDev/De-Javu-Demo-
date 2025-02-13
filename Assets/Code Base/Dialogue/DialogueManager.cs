@@ -1,15 +1,23 @@
+using System.Collections;
 using UnityEngine;
+
+public enum DialogueType
+{
+   None = 0,
+   WithCharacter = 1,
+   WithoutCharacter = 2,
+}
 
 public class DialogueManager : SingletonBase<DialogueManager>
 {
+   [SerializeField] private float maxTimeText = 6f;
    private DialogueNode[] _nodes;
    private DialogueUI _dialogueUI;
    private DialogueNode _currentNode;
-   private Sprite _currentPortrait;
+   private int _currentNodeIndex;
    private int _currenNpcTextIndex;
    private int _maxNpcText;
-   private int _maxNode;
-
+   public bool IsDialogue { get; private set; }
    private void Awake()
    {
       Init();
@@ -18,65 +26,106 @@ public class DialogueManager : SingletonBase<DialogueManager>
    private void Start()
    {
       _dialogueUI = DialogueUI.Instance;
+   }
+   
+   public void StartDialogue(DialogueObj dialogue,DialogueType dialogueType)
+   {
+      if (IsDialogue) return;
+
+      DisableAllOtherHud();
+      _nodes = dialogue.Dialogue;
+      _currentNodeIndex = 0;
+      Debug.Log("Dialogue Begin");
+      IsDialogue = true;
+      switch (dialogueType)
+      {
+         case DialogueType.WithoutCharacter:
+            StartCoroutine(DialogueWithoutCharacter());
+            break;
+         case DialogueType.WithCharacter:;
+            StartCoroutine(DialogueWithCharacter());
+            break;
+      }
+   }
+   
+   public void NextNode(int nodeIndex)
+   {
+      _currentNodeIndex = nodeIndex;
+      _currentNode = _nodes[_currentNodeIndex];
+      _currenNpcTextIndex = 0;
+      _maxNpcText = _currentNode.npcText.Length;
+   }
+
+   private IEnumerator DialogueWithoutCharacter()
+   {
+      NextNode(_currentNodeIndex);
+      while (_currenNpcTextIndex < _maxNpcText)
+      {
+         var currentNpcNode = _currentNode.npcText[_currenNpcTextIndex];
+         var npcText = currentNpcNode.text;
+         var emotion = currentNpcNode.emotion;
+         var npcName = currentNpcNode.name;
+         _dialogueUI.SetProperties(npcName,npcText,emotion);
+         _currenNpcTextIndex++;
+         var waitTime = npcText.Length*0.3f;
+         if (waitTime > maxTimeText) waitTime = maxTimeText;
+         Debug.Log(waitTime);
+         yield return new WaitForSeconds(waitTime);
+      }
+      EndDialogue();
+   }
+
+   private IEnumerator DialogueWithCharacter()
+   {
+      while (true)
+      {
+         NextNode(_currentNodeIndex);
+         while (_currenNpcTextIndex < _maxNpcText)
+         {
+            var currentNpcNode = _currentNode.npcText[_currenNpcTextIndex];
+            var npcText = currentNpcNode.text;
+            var emotion = currentNpcNode.emotion;
+            var npcName = currentNpcNode.name;
+            _dialogueUI.SetProperties(npcName,npcText,emotion);
+            _currenNpcTextIndex++;
+            yield return new WaitForSeconds(0.2f);
+            yield return new WaitUntil(()=>Input.GetKeyDown(KeyCode.Space));
+         }
+      
+         if (_currentNode.playerAnswer.Length > 0)
+         {
+            if (_currentNode.playerAnswer[0].exit) break; 
+            if (_currentNode.playerAnswer[0].text == "")
+            {
+               _currentNodeIndex = _currentNode.playerAnswer[0].toNode;
+               continue;
+            }
+            
+            _dialogueUI.CreateAnswer(_currentNode.playerAnswer);
+            var currentNode = _currentNodeIndex;
+            yield return new WaitUntil(()=> currentNode != _currentNodeIndex);
+            continue;
+         }
+         break;
+      }
+      Player.Instance.ReturnCamera();
       EndDialogue();
    }
    
-   public void StartDialogue(DialogueObj dialogue,int startNodeIndex , Sprite portrait)
+   private void DisableAllOtherHud()
    {
-      _nodes = dialogue.Dialogue;
-      _currentPortrait = portrait;
-      ChangeNode(startNodeIndex);
-   }
-
-   public void EndDialogue()
-   {
-      Debug.Log("Ending Dialogue");
-      _currenNpcTextIndex = 0;
-      _dialogueUI.EndDialogue();
-      enabled = false;
-   }
-
-   public void ChangeNode(int nodeIndex)
-   {
-      _currentNode = _nodes[nodeIndex];
-      _currenNpcTextIndex = 0;
-      if (_currentNode.npcText.Length == 0)
-      {
-         CreateAnswers();
-         return;
-      }
-      _maxNpcText = _currentNode.npcText.Length;
-      enabled = true;
-      _dialogueUI.SetProperties(_currentNode.npcText[_currenNpcTextIndex],_currentPortrait);
+      
    }
    
-   private void Update()
+   public void EndDialogue()
    {
-      if (Input.GetKeyDown(KeyCode.Mouse0))
-      {
-         if (_currenNpcTextIndex + 1 < _maxNpcText)
-         {
-            _currenNpcTextIndex++;
-            _dialogueUI.SetProperties(_currentNode.npcText[_currenNpcTextIndex],_currentPortrait);
-         }
-         else CreateAnswers();
-      }
-   }
-
-   private void CreateAnswers()
-   {
-      if (_currentNode.playerAnswer[0].exit)
-      {
-         EndDialogue();
-         return;
-      }
-      
-      if (_currentNode.playerAnswer[0].text == "")
-      {
-         ChangeNode(_currentNode.playerAnswer[0].toNode);
-         return;
-      }
-      _dialogueUI.CreateAnswer(_currentNode.playerAnswer);
-      enabled = false;
+      _dialogueUI.EndDialogue();
+      _nodes = null;
+      _currentNode = null;
+      _currentNodeIndex = 0;
+      _currenNpcTextIndex = 0;
+      _maxNpcText = 0;
+      Debug.Log("Dialogue End");
+      IsDialogue = false;
    }
 }

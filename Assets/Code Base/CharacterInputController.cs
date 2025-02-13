@@ -39,7 +39,7 @@ public class CharacterInputController : SingletonBase<CharacterInputController>
         CameraUpdate();
         MainRay();
     }
-
+    
     private const string Horizontal = "Horizontal";
     private const string Vertical = "Vertical";
 
